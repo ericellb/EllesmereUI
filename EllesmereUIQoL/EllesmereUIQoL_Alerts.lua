@@ -445,11 +445,8 @@ end
 --  back when new points appear, and waits for combat to end before showing.
 -------------------------------------------------------------------------------
 do
-    -- Blizzard's own trigger events for its talent alert (retail), and the
-    -- classic talent events (WoW Forever).
-    local EVENTS = EUI.IS_FOREVER
-        and { "PLAYER_ENTERING_WORLD", "PLAYER_TALENT_UPDATE", "PLAYER_LEVEL_UP", "CHARACTER_POINTS_CHANGED" }
-        or { "PLAYER_ENTERING_WORLD", "PLAYER_TALENT_UPDATE", "PLAYER_SPECIALIZATION_CHANGED", "PLAYER_LEVEL_CHANGED" }
+    -- Blizzard's own trigger events for its talent alert.
+    local EVENTS = { "PLAYER_ENTERING_WORLD", "PLAYER_TALENT_UPDATE", "PLAYER_SPECIALIZATION_CHANGED", "PLAYER_LEVEL_CHANGED" }
 
     local watcher
     local installed = false
@@ -458,7 +455,6 @@ do
     local dirty = false
 
     local function HasUnspent()
-        if EUI.IS_FOREVER then return (GetUnspentTalentPoints() or 0) > 0 end
         if not C_SpecializationInfo.CanPlayerUseTalentUI() then return false end
         return (C_ClassTalents.HasUnspentTalentPoints() or C_ClassTalents.HasUnspentHeroTalentPoints()) and true or false
     end
@@ -493,7 +489,7 @@ do
     local function MarkDirty()
         if dirty then return end
         dirty = true
-        C_Timer.After(1, Evaluate)   -- talent data settles a moment after these events
+        C_Timer.After(0, Evaluate)   -- next frame: one pass per burst of events
     end
 
     local function Apply()
